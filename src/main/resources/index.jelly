@@ -1,0 +1,4 @@
+<?jelly escape-by-default='true'?>
+<div>
+    This plugins allows a workflow to upload an artifact to a papyrus-compatible API server.
+</div>
