@@ -30,13 +30,11 @@ import java.util.List;
 
 @SuppressFBWarnings({"NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE"})
 public class UploadBuildNotifier extends Notifier {
-    private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
-
-    private final String url;
-    private final String accessToken;
-    private final String project;
-    private final String version;
-    private final String fileName;
+    public final String url;
+    public final String accessToken;
+    public final String project;
+    public final String version;
+    public final String fileName;
 
     @DataBoundConstructor
     public UploadBuildNotifier(String url, String accessToken, String project, String version, String fileName) {
