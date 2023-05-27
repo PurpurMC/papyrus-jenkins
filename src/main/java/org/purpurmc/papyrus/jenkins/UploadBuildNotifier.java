@@ -13,7 +13,6 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Mailer;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
-import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -35,13 +34,15 @@ public class UploadBuildNotifier extends Notifier {
     public final String project;
     public final String version;
     public final String fileName;
+    public final String postScript;
 
     @DataBoundConstructor
-    public UploadBuildNotifier(String url, String accessToken, String project, String version, String fileName) {
+    public UploadBuildNotifier(String url, String accessToken, String project, String version, String fileName, String postScript) {
         this.accessToken = accessToken;
         this.project = project;
         this.version = version;
         this.fileName = fileName;
+        this.postScript = postScript;
 
         url = url.trim();
         while (url.endsWith("/")) {
@@ -114,6 +115,10 @@ public class UploadBuildNotifier extends Notifier {
             if (!response.isSuccessful() || response.body() == null) {
                 return false;
             }
+        }
+
+        if (this.postScript != null) {
+            Runtime.getRuntime().exec(String.format("/bin/sh -c %s", this.postScript));
         }
 
         listener.getLogger().println("Successfully uploaded this build to papyrus");

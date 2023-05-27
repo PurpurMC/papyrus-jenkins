@@ -19,4 +19,8 @@
     <f:entry title="The file to upload" field="fileName">
         <f:textbox />
     </f:entry>
+
+    <f:entry title="The path to a script to run post-upload" field="postScript">
+        <f:textbox />
+    </f:entry>
 </j:jelly>
