@@ -114,10 +114,15 @@ public class UploadBuildNotifier extends Notifier {
 
         CreateBuildResponse createBuildResponse;
         try (Response response = client.newCall(request).execute()) {
-            if (!response.isSuccessful() || response.body() == null) {
+            ResponseBody body = response.body();
+            if (!response.isSuccessful()) {
+                listener.getLogger().println("[" + response.code() + "] Failed to create build with body: " + body.string());
+                return false;
+            } else if (body == null) {
+                listener.getLogger().println("[" + response.code() + "] Failed to create build with empty response body.");
                 return false;
             }
-            createBuildResponse = mapper.readValue(response.body().bytes(), CreateBuildResponse.class);
+            createBuildResponse = mapper.readValue(body.bytes(), CreateBuildResponse.class);
         }
 
         Path path = Paths.get(build.getWorkspace().toURI()).resolve(this.fileName);
@@ -137,7 +142,12 @@ public class UploadBuildNotifier extends Notifier {
                 .build();
 
         try (Response response = client.newCall(uploadFileRequest).execute()) {
-            if (!response.isSuccessful() || response.body() == null) {
+            ResponseBody body = response.body();
+            if (!response.isSuccessful()) {
+                listener.getLogger().println("[" + response.code() + "] Failed to upload file with error: " + body.string());
+                return false;
+            } else if (body == null) {
+                listener.getLogger().println("[" + response.code() + "] Failed to upload file with empty response body.");
                 return false;
             }
         }
