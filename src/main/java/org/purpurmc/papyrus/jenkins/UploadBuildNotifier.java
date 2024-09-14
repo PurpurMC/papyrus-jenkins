@@ -18,7 +18,9 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -26,6 +28,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @SuppressFBWarnings({"NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE"})
 public class UploadBuildNotifier extends Notifier {
@@ -35,6 +38,8 @@ public class UploadBuildNotifier extends Notifier {
     public final String version;
     public final String fileName;
     public final String postScript;
+
+    private List<Metadata> metadata = new ArrayList<>();
 
     @DataBoundConstructor
     public UploadBuildNotifier(String url, String accessToken, String project, String version, String fileName, String postScript) {
@@ -49,6 +54,22 @@ public class UploadBuildNotifier extends Notifier {
             url = url.substring(0, url.length() - 1);
         }
         this.url = url;
+    }
+
+    public List<Metadata> getMetadata() {
+        return this.metadata;
+    }
+
+    @DataBoundSetter
+    public void setMetadata(List<Metadata> metadata) {
+        this.metadata = new ArrayList<>();
+        if (metadata != null) {
+            this.metadata.addAll(metadata);
+        }
+    }
+
+    Map<String, String> getMetadataMap() {
+        return Metadata.toMap(getMetadata());
     }
 
     @Override
@@ -75,6 +96,10 @@ public class UploadBuildNotifier extends Notifier {
             commits.add(commit);
         }
         createBuild.commits = commits;
+
+        if (!getMetadata().isEmpty()) {
+            createBuild.metadata = getMetadataMap();
+        }
 
         OkHttpClient client = new OkHttpClient();
         ObjectMapper mapper = new ObjectMapper();

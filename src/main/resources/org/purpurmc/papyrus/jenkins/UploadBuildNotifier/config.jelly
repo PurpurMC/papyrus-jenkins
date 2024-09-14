@@ -8,6 +8,10 @@
         <f:textbox />
     </f:entry>
 
+    <f:entry title="The metadata to attach onto the build being built" field="metadata">
+        <f:repeatableHeteroProperty field="metadata" hasHeader="true" addCaption="Add Metadata" deleteCaption="Delete Metadata" />
+    </f:entry>
+
     <f:entry title="The papyrus project" field="project">
         <f:textbox />
     </f:entry>
