@@ -3,6 +3,6 @@
 
 ## Requirements
 Jenkins must have the following plugins installed:
-* mailer
+* git
 * jackson2-api
 * okhttp-api

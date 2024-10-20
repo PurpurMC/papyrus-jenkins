@@ -8,6 +8,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.model.Result;
+import hudson.plugins.git.GitChangeSet;
 import hudson.scm.ChangeLogSet;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Mailer;
@@ -90,7 +91,7 @@ public class UploadBuildNotifier extends Notifier {
             CreateBuildRequest.Commit commit = new CreateBuildRequest.Commit();
             commit.author = entry.getAuthor().getFullName();
             commit.email = entry.getAuthor().getProperty(Mailer.UserProperty.class).getAddress();
-            commit.description = entry.getMsg();
+            commit.description = entry instanceof GitChangeSet ? ((GitChangeSet) entry).getComment() : entry.getMsg();
             commit.hash = entry.getCommitId();
             commit.timestamp = entry.getTimestamp();
             commits.add(commit);
