@@ -3,6 +3,7 @@ package org.purpurmc.papyrus.jenkins;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Extension;
+import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
@@ -24,9 +25,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -126,8 +125,21 @@ public class UploadBuildNotifier extends Notifier {
             createBuildResponse = mapper.readValue(body.bytes(), CreateBuildResponse.class);
         }
 
-        Path path = Paths.get(build.getWorkspace().toURI()).resolve(this.fileName);
-        byte[] file = Files.readAllBytes(path);
+        FilePath path = build.getWorkspace().child(this.fileName);
+        if (build.getResult() != Result.SUCCESS) {
+            listener.getLogger().println("Not uploading build file since build failed.");
+            return true;
+        }
+
+        if (!path.exists()) {
+            listener.getLogger().printf("(%s) File does not exist at '%s'. Did something break?%n", path.isRemote() ? "Remote" : "Local", path);
+            return false;
+        }
+
+        byte[] file;
+        try (InputStream in = path.read()) {
+            file = in.readAllBytes();
+        }
 
         RequestBody fileBody = RequestBody.create(file);
         MultipartBody multipartBody = new MultipartBody.Builder()
