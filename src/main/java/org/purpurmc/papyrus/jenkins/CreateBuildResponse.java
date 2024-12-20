@@ -1,7 +1,3 @@
 package org.purpurmc.papyrus.jenkins;
 
-import java.util.List;
-
-public class CreateBuildResponse {
-    public String stateKey;
-}
+public final record CreateBuildResponse(String stateKey) {}

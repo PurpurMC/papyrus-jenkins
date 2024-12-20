@@ -144,7 +144,7 @@ public class UploadBuildNotifier extends Notifier {
         RequestBody fileBody = RequestBody.create(file);
         MultipartBody multipartBody = new MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
-                .addFormDataPart("stateKey", createBuildResponse.stateKey)
+                .addFormDataPart("stateKey", createBuildResponse.stateKey())
                 .addFormDataPart("file", this.fileName, fileBody)
                 .build();
 
