@@ -2,6 +2,7 @@ package org.purpurmc.papyrus.jenkins;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import hudson.AbortException;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -117,24 +118,20 @@ public class UploadBuildNotifier extends Notifier {
             ResponseBody body = response.body();
             if (!response.isSuccessful()) {
                 ErrorResponse errorResponse = mapper.readValue(body.bytes(), ErrorResponse.class);
-                listener.getLogger().println("[" + response.code() + "] Failed to create build with body: " + errorResponse.error());
-                return false;
+                throw new AbortException("[%d] Failed to create build with body: %s".formatted(response.code(), errorResponse.error()));
             } else if (body == null) {
-                listener.getLogger().println("[" + response.code() + "] Failed to create build with empty response body.");
-                return false;
+                throw new AbortException("[%d] Failed to create build with empty response body.".formatted(response.code()));
             }
             createBuildResponse = mapper.readValue(body.bytes(), CreateBuildResponse.class);
         }
 
         FilePath path = build.getWorkspace().child(this.fileName);
         if (build.getResult() != Result.SUCCESS) {
-            listener.getLogger().println("Not uploading build file since build failed.");
-            return true;
+            throw new AbortException("Not uploading build file since build failed.");
         }
 
         if (!path.exists()) {
-            listener.getLogger().printf("(%s) File does not exist at '%s'. Did something break?%n", path.isRemote() ? "Remote" : "Local", path);
-            return false;
+            throw new AbortException("(%s) File does not exist at '%s'. Did something break?".formatted(path.isRemote() ? "Remote" : "Local", path));
         }
 
         byte[] file;
@@ -158,11 +155,9 @@ public class UploadBuildNotifier extends Notifier {
         try (Response response = client.newCall(uploadFileRequest).execute()) {
             ResponseBody body = response.body();
             if (!response.isSuccessful()) {
-                listener.getLogger().println("[" + response.code() + "] Failed to upload file with error: " + body.string());
-                return false;
+                throw new AbortException("[%d] Failed to upload file with error: %s".formatted(response.code(), body.string()));
             } else if (body == null) {
-                listener.getLogger().println("[" + response.code() + "] Failed to upload file with empty response body.");
-                return false;
+                throw new AbortException("[%d] Failed to upload file with empty response body.".formatted(response.code()));
             }
         }
 
