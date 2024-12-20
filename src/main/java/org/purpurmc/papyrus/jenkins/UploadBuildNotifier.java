@@ -75,6 +75,10 @@ public class UploadBuildNotifier extends Notifier {
 
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
+        if (!build.getResult().isCompleteBuild()) {
+            throw new AbortException("Not uploading build file since build is not complete (result = %s).".formatted(build.getResult()));
+        }
+
         CreateBuildRequest createBuild = new CreateBuildRequest();
         createBuild.project = this.project;
         createBuild.version = this.version;
