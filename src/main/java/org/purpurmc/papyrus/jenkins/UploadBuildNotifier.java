@@ -116,7 +116,8 @@ public class UploadBuildNotifier extends Notifier {
         try (Response response = client.newCall(request).execute()) {
             ResponseBody body = response.body();
             if (!response.isSuccessful()) {
-                listener.getLogger().println("[" + response.code() + "] Failed to create build with body: " + body.string());
+                ErrorResponse errorResponse = mapper.readValue(body.bytes(), ErrorResponse.class);
+                listener.getLogger().println("[" + response.code() + "] Failed to create build with body: " + errorResponse.error());
                 return false;
             } else if (body == null) {
                 listener.getLogger().println("[" + response.code() + "] Failed to create build with empty response body.");
